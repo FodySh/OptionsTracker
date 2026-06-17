@@ -12,6 +12,45 @@
 /* ════════════════════════════════════════════════════════════
    OPTIONSPRO TERMINAL — design tokens
 ════════════════════════════════════════════════════════════ */
+
+   
+<!-- Firebase SDK (Authentication + Firestore) — modular v10 -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, writeBatch
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  /* ════════════════════════════════════════════════════════════
+     FIREBASE CONFIG — PASTE YOUR PROJECT VALUES HERE
+     Get these from: Firebase Console → Project Settings → General
+     → "Your apps" → Web app → SDK setup and configuration
+  ════════════════════════════════════════════════════════════ */
+  const firebaseConfig = {
+    apiKey:            "PASTE_API_KEY_HERE",
+    authDomain:         "PASTE_PROJECT_ID.firebaseapp.com",
+    projectId:          "PASTE_PROJECT_ID",
+    storageBucket:      "PASTE_PROJECT_ID.appspot.com",
+    messagingSenderId:  "PASTE_SENDER_ID",
+    appId:              "PASTE_APP_ID"
+  };
+
+  const fbApp  = initializeApp(firebaseConfig);
+  const fbAuth = getAuth(fbApp);
+  const fbDb   = getFirestore(fbApp);
+  const googleProvider = new GoogleAuthProvider();
+
+  // Expose to the regular (non-module) script below via window
+  window.__firebase = {
+    auth: fbAuth, db: fbDb, provider: googleProvider,
+    signInWithPopup, signOut, onAuthStateChanged,
+    doc, setDoc, getDoc, collection, getDocs, deleteDoc, writeBatch
+  };
+  window.dispatchEvent(new Event('firebase-ready'));
+</script>
 :root {
   /* TradingView dark palette */
   --bg-base:     #131722;
