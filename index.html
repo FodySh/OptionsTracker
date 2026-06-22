@@ -24,13 +24,12 @@
      → "Your apps" → Web app → SDK setup and configuration
   ════════════════════════════════════════════════════════════ */
   const firebaseConfig = {
-  apiKey: "AIzaSyBUzCISS1jFj4QB62ThyKKsS_aBtxOByBs",
-  authDomain: "usoptions-2030f.firebaseapp.com",
-  projectId: "usoptions-2030f",
-  storageBucket: "usoptions-2030f.firebasestorage.app",
-  messagingSenderId: "780662780879",
-  appId: "1:780662780879:web:148af52ccacf098cc658ba",
-  measurementId: "G-PXE60XMJ8E"
+    apiKey:            "PASTE_API_KEY_HERE",
+    authDomain:         "PASTE_PROJECT_ID.firebaseapp.com",
+    projectId:          "PASTE_PROJECT_ID",
+    storageBucket:      "PASTE_PROJECT_ID.appspot.com",
+    messagingSenderId:  "PASTE_SENDER_ID",
+    appId:              "PASTE_APP_ID"
   };
 
   const fbApp  = initializeApp(firebaseConfig);
@@ -503,7 +502,7 @@ tbody td:first-child { color: var(--text-1); font-weight: 500; }
 .btn-sm { padding: 5px 10px; font-size: 12px; }
 
 /* ─── Forms ─── */
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.form-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
 .form-group { display: flex; flex-direction: column; gap: 5px; }
 .form-group label { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--text-3); text-transform: uppercase; }
 .form-group input, .form-group select, .form-group textarea {
@@ -1333,7 +1332,7 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
           </button>
         </div>
       </div>
-      <div id="add-form">
+      <div id="add-form" style="max-width:860px;">
         <div class="form-grid">
           <div class="form-group">
             <label>Ticker Symbol</label>
@@ -1541,11 +1540,11 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
     <div class="page-title">Broker Management</div>
     <div class="page-sub">Manage brokers and commission structures — linked to all transactions</div>
 
-    <div class="card" style="margin-bottom:20px;">
+    <div class="card" style="margin-bottom:20px;max-width:860px;">
       <div class="card-header">
         <div class="card-title"><i class="fa-solid fa-plus"></i> Add Broker</div>
       </div>
-      <div class="form-grid">
+      <div class="form-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));">
         <div class="form-group">
           <label>Broker Name</label>
           <input type="text" id="b-name" placeholder="e.g. TD Ameritrade">
@@ -1628,11 +1627,11 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" style="max-width:860px;">
       <div class="card-header">
         <div class="card-title"><i class="fa-solid fa-plus"></i> Add Subscription</div>
       </div>
-      <div class="form-grid">
+      <div class="form-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));">
         <div class="form-group">
           <label>Service Name</label>
           <input type="text" id="s-name" placeholder="e.g. TastyTrade Platform">
@@ -1818,7 +1817,7 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
       <div class="modal-title">Edit Position</div>
       <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="form-grid">
+    <div class="form-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));">
       <div class="form-group"><label>Ticker</label><input id="e-ticker" type="text" style="text-transform:uppercase"></div>
       <div class="form-group"><label>Type</label><select id="e-type"><option value="CALL">CALL</option><option value="PUT">PUT</option></select></div>
       <div class="form-group"><label>Strike ($)</label><input id="e-strike" type="number" step="0.01"></div>
