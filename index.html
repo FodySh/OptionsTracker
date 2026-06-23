@@ -24,13 +24,13 @@
      → "Your apps" → Web app → SDK setup and configuration
   ════════════════════════════════════════════════════════════ */
   const firebaseConfig = {
-  apiKey: "AIzaSyBUzCISS1jFj4QB62ThyKKsS_aBtxOByBs",
-  authDomain: "usoptions-2030f.firebaseapp.com",
-  projectId: "usoptions-2030f",
-  storageBucket: "usoptions-2030f.firebasestorage.app",
-  messagingSenderId: "780662780879",
-  appId: "1:780662780879:web:148af52ccacf098cc658ba",
-  measurementId: "G-PXE60XMJ8E"
+    apiKey:            "AIzaSyBUzCISS1jFj4QB62ThyKKsS_aBtxOByBs",
+    authDomain:        "usoptions-2030f.firebaseapp.com",
+    projectId:         "usoptions-2030f",
+    storageBucket:     "usoptions-2030f.firebasestorage.app",
+    messagingSenderId: "780662780879",
+    appId:             "1:780662780879:web:148af52ccacf098cc658ba",
+    measurementId:     "G-PXE60XMJ8E"
   };
 
   const fbApp  = initializeApp(firebaseConfig);
@@ -1693,7 +1693,7 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
               <option value="Covered Call">Covered Call</option>
               <option value="Cash Secured Put">Cash Secured Put</option>
               <option value="Bull Call Spread">Bull Call Spread</option>
-              <option value="Options Decision Dashboard">Options Decision Dashboard</option>
+              <option value="Bear Put Spread">Bear Put Spread</option>
               <option value="VWAP 5min">VWAP 5min</option>
               <option value="Telegram group">Telegram group</option>
               <option value="Other">Other</option>
@@ -2776,11 +2776,17 @@ function renderDashboard(period) {
   });
   const tickerRows = Object.entries(byTicker).sort((a,b)=>b[1]-a[1]);
 
-  // Strategy breakdown
+  // Strategy breakdown — collect full stats per strategy
   const byStrat = {};
   filtered.forEach(t => {
     const s = t.strategy || 'Other';
-    byStrat[s] = (byStrat[s]||0) + calcPnL(t);
+    if (!byStrat[s]) byStrat[s] = { pnl:0, wins:0, losses:0, open:0, total:0 };
+    const p = calcPnL(t);
+    byStrat[s].pnl   += p;
+    byStrat[s].total += 1;
+    if (t.status === 'OPEN')        byStrat[s].open   += 1;
+    else if (p > 0)                 byStrat[s].wins   += 1;
+    else if (p <= 0)                byStrat[s].losses += 1;
   });
 
   const periodLabel = {day:'Today',week:'This Week',month:'This Month',year:'This Year'}[period];
@@ -2855,14 +2861,37 @@ function renderDashboard(period) {
       <div class="card">
         <div class="card-header">
           <div class="card-title"><i class="fa-solid fa-layer-group"></i> Strategy Breakdown</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);">WIN RATE · P&L · TRADES</div>
         </div>
-        ${Object.keys(byStrat).length ? Object.entries(byStrat).sort((a,b)=>b[1]-a[1]).map(([strat,pnl]) => {
-          const cls = pnl >= 0 ? 'pos' : 'neg';
-          return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
-            <span style="font-size:13px;">${strat}</span>
-            <span style="font-family:var(--mono);font-size:12px;" class="${cls}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(2)}</span>
-          </div>`;
-        }).join('') : '<div style="color:var(--text-3);font-size:12px;font-family:var(--mono);">No data</div>'}
+        ${Object.keys(byStrat).length ? Object.entries(byStrat)
+          .sort((a,b) => b[1].pnl - a[1].pnl)
+          .map(([strat, d]) => {
+            const closed  = d.wins + d.losses;
+            const wr      = closed ? Math.round(d.wins / closed * 100) : null;
+            const wrStr   = wr !== null ? wr + '%' : '—';
+            const wrColor = wr === null ? 'var(--text-3)' : wr >= 60 ? 'var(--green)' : wr >= 40 ? 'var(--amber)' : 'var(--red)';
+            const pnlCls  = d.pnl >= 0 ? 'pos' : 'neg';
+            const barW    = wr !== null ? wr : 0;
+            const barColor= wr === null ? 'var(--border)' : wr >= 60 ? 'var(--green)' : wr >= 40 ? 'var(--amber)' : 'var(--red)';
+            return `<div style="padding:11px 0;border-bottom:1px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+                <span style="font-size:13px;font-weight:500;">${strat}</span>
+                <div style="display:flex;align-items:center;gap:14px;">
+                  <span style="font-family:var(--mono);font-size:11px;color:var(--text-3);">${d.total} trade${d.total!==1?'s':''}${d.open?' · '+d.open+' open':''}</span>
+                  <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${wrColor};">${wrStr}</span>
+                  <span style="font-family:var(--mono);font-size:13px;font-weight:700;min-width:80px;text-align:right;" class="${pnlCls}">${d.pnl>=0?'+':''}$${Math.abs(d.pnl).toFixed(2)}</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="flex:1;height:5px;background:var(--bg-hover);border-radius:3px;overflow:hidden;">
+                  <div style="height:100%;width:${barW}%;background:${barColor};border-radius:3px;transition:width .5s ease;"></div>
+                </div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-3);white-space:nowrap;min-width:72px;text-align:right;">
+                  ${d.wins}W · ${d.losses}L${d.open?' · '+d.open+'⏳':''}
+                </div>
+              </div>
+            </div>`;
+          }).join('') : '<div style="color:var(--text-3);font-size:12px;font-family:var(--mono);">No data</div>'}
       </div>
 
       <div class="card" style="flex:0.8;">
