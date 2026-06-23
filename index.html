@@ -315,6 +315,52 @@ body {
 
 
 
+/* ─── Strategy Manager ─── */
+.strategy-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.strategy-item:last-child { border-bottom: none; }
+.strategy-item-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+.strategy-item-count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  white-space: nowrap;
+  min-width: 60px;
+  text-align: right;
+}
+.strategy-edit-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border-hi);
+  border-radius: 7px;
+  padding: 6px 10px;
+  color: var(--text-1);
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--cyan-glow);
+}
+.strategy-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--cyan-dim);
+  color: var(--cyan);
+  border: 1px solid rgba(0,212,255,0.15);
+  white-space: nowrap;
+}
+
 /* ─── Capital card ─── */
 .capital-card {
   background: var(--bg-card);
@@ -1487,6 +1533,10 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
       <i class="fa-solid fa-building-columns"></i>
       <span>Brokers</span>
     </div>
+    <div class="nav-item" onclick="showPage('strategies')">
+      <i class="fa-solid fa-tags"></i>
+      <span>Strategies</span>
+    </div>
 
     <div class="nav-section-label">Analytics</div>
     <div class="nav-item" onclick="showPage('dashboard')">
@@ -1687,17 +1737,7 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
           </div>
           <div class="form-group">
             <label>Strategy Tag</label>
-            <select id="f-strategy">
-              <option value="Long Call">Long Call</option>
-              <option value="Long Put">Long Put</option>
-              <option value="Covered Call">Covered Call</option>
-              <option value="Cash Secured Put">Cash Secured Put</option>
-              <option value="Bull Call Spread">Bull Call Spread</option>
-              <option value="Bear Put Spread">Bear Put Spread</option>
-              <option value="VWAP 5min">VWAP 5min</option>
-              <option value="Telegram group">Telegram group</option>
-              <option value="Other">Other</option>
-            </select>
+            <select id="f-strategy"><!-- populated by populateStrategySelects() --></select>
           </div>
           <div class="form-group">
             <label>Trade Date</label>
@@ -1899,6 +1939,40 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
 
     <div id="brokers-list">
       <div class="empty-state"><i class="fa-solid fa-building-columns"></i><p>No brokers added yet.<br>Add your first broker above.</p></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       PAGE: STRATEGIES
+  ══════════════════════════════════════════════ -->
+  <div class="page" id="page-strategies">
+    <div class="page-title">Strategy Manager</div>
+    <div class="page-sub">Add, edit and delete your trading strategies — changes reflect everywhere in the app</div>
+
+    <div class="card" style="max-width:560px;margin-bottom:20px;">
+      <div class="card-header">
+        <div class="card-title"><i class="fa-solid fa-plus"></i> Add Strategy</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-end;">
+        <div class="form-group" style="flex:1;">
+          <label>Strategy Name</label>
+          <input type="text" id="new-strategy-input" placeholder="e.g. Breakout Play" maxlength="40"
+            onkeydown="if(event.key==='Enter')addStrategy()">
+        </div>
+        <button class="btn btn-primary" style="padding:9px 18px;flex-shrink:0;" onclick="addStrategy()">
+          <i class="fa-solid fa-circle-plus"></i> Add
+        </button>
+      </div>
+    </div>
+
+    <div class="card" style="max-width:560px;">
+      <div class="card-header">
+        <div class="card-title"><i class="fa-solid fa-list"></i> Your Strategies</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);" id="strategies-count">0 strategies</div>
+      </div>
+      <div id="strategies-list">
+        <div class="empty-state"><i class="fa-solid fa-tags"></i><p>No strategies yet.</p></div>
+      </div>
     </div>
   </div>
 
@@ -2144,7 +2218,7 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
       <div class="form-group"><label>Current Price ($)</label><input id="e-current" type="number" step="0.01"></div>
       <div class="form-group"><label>Status</label><select id="e-status"><option value="OPEN">OPEN</option><option value="CLOSED">CLOSED</option><option value="EXPIRED">EXPIRED</option></select></div>
       <div class="form-group"><label>Broker</label><select id="e-broker"></select></div>
-      <div class="form-group"><label>Strategy</label><select id="e-strategy"><option value="Long Call">Long Call</option><option value="Long Put">Long Put</option><option value="Covered Call">Covered Call</option><option value="Cash Secured Put">Cash Secured Put</option><option value="Bull Call Spread">Bull Call Spread</option><option value="Bear Put Spread">Bear Put Spread</option><option value="VWAP 5min">VWAP 5min</option><option value="Telegram group">Telegram group</option><option value="Other">Other</option></select></div>
+      <div class="form-group"><label>Strategy</label><select id="e-strategy"><!-- populated by populateStrategySelects() --></select></div>
       <div class="form-group"><label>Trade Date</label><input id="e-tradedate" type="date"></div>
       <div class="form-group"><label>Notes</label><input id="e-notes" type="text"></div>
     </div>
@@ -2169,8 +2243,14 @@ let DB = {
   trades: [],        // {id, ticker, type, strike, expiry, contracts, entry_premium, current_price, status, broker_id, strategy, trade_date, notes}
   brokers: [],       // {id, name, commission_per_contract, base_fee, account_type, website, notes}
   subscriptions: [], // {id, name, category, amount, period, renewal_date, active, notes}
+  strategies: [],    // string[] — user-defined strategy names
   meta: { next_trade_id: 1, next_broker_id: 1, next_sub_id: 1 }
 };
+
+const DEFAULT_STRATEGIES = [
+  'Long Call','Long Put','Covered Call','Cash Secured Put',
+  'Bull Call Spread','Bear Put Spread','VWAP 5min','Telegram group','Other'
+];
 
 let currentUser = null;     // Firebase Auth user object, set on sign-in
 let saveDebounce = null;    // debounce timer so rapid edits don't spam Firestore
@@ -2217,13 +2297,14 @@ async function loadDB() {
         trades: data.trades || [],
         brokers: data.brokers || [],
         subscriptions: data.subscriptions || [],
+        strategies: data.strategies || [...DEFAULT_STRATEGIES],
         meta: data.meta || { next_trade_id: 1, next_broker_id: 1, next_sub_id: 1 }
       };
       setSyncStatus('synced', 'Up to date');
       return true;
     } else {
       // New user — start with empty DB, will be created on first save
-      DB = { trades: [], brokers: [], subscriptions: [], meta: { next_trade_id: 1, next_broker_id: 1, next_sub_id: 1 } };
+      DB = { trades: [], brokers: [], subscriptions: [], strategies: [...DEFAULT_STRATEGIES], meta: { next_trade_id: 1, next_broker_id: 1, next_sub_id: 1 } };
       setSyncStatus('synced', 'New account');
       return false;
     }
@@ -2332,11 +2413,12 @@ function showPage(name) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   event.currentTarget.classList.add('active');
-  const titles = { transactions:'Transactions', brokers:'Broker Management', dashboard:'P&L Dashboard', subscriptions:'Subscriptions & Fees', brief:'Morning Brief' };
+  const titles = { transactions:'Transactions', brokers:'Broker Management', dashboard:'P&L Dashboard', subscriptions:'Subscriptions & Fees', brief:'Morning Brief', strategies:'Strategy Manager' };
   document.getElementById('topbar-title').textContent = titles[name] || name;
-  if (name === 'dashboard') renderDashboard('day');
+  if (name === 'dashboard')   renderDashboard('day');
   if (name === 'subscriptions') renderSubs();
-  if (name === 'brokers') renderBrokers();
+  if (name === 'brokers')     renderBrokers();
+  if (name === 'strategies')  renderStrategies();
   // Close mobile sidebar drawer after navigation
   if (window.innerWidth <= 900) closeSidebar();
 }
@@ -2369,6 +2451,7 @@ function runAppInit() {
   buildTicker();
   // Render
   populateBrokerDropdowns();
+  populateStrategySelects();
   if (typeof buildMonthOptions === 'function') { buildMonthOptions(); buildFeeBrokerOptions(); }
   renderTrades();
   if (typeof renderFeeTable === 'function') renderFeeTable();
@@ -3932,6 +4015,154 @@ function exportFeesToExcel() {
     const monthLabel = monthF ? '_' + monthF : '';
     XLSX.writeFile(wb, 'OptionsPro_Fees' + monthLabel + '.xlsx');
   });
+}
+
+/* ════════════════════════════════════════
+   STRATEGY MANAGER
+════════════════════════════════════════ */
+
+function getStrategies() {
+  if (!DB.strategies || !DB.strategies.length) DB.strategies = [...DEFAULT_STRATEGIES];
+  return DB.strategies;
+}
+
+/* Rebuild all strategy <select> elements from DB.strategies */
+function populateStrategySelects() {
+  const strats = getStrategies();
+  ['f-strategy', 'e-strategy'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = strats.map(s => `<option value="${s}">${s}</option>`).join('');
+    // Restore previous selection if still valid
+    if (strats.includes(cur)) sel.value = cur;
+  });
+}
+
+/* Render the strategy manager page */
+function renderStrategies() {
+  const strats = getStrategies();
+  const el = document.getElementById('strategies-list');
+  const countEl = document.getElementById('strategies-count');
+  if (!el) return;
+
+  if (countEl) countEl.textContent = strats.length + ' strateg' + (strats.length === 1 ? 'y' : 'ies');
+
+  if (!strats.length) {
+    el.innerHTML = '<div class="empty-state"><i class="fa-solid fa-tags"></i><p>No strategies yet.</p></div>';
+    return;
+  }
+
+  el.innerHTML = strats.map((s, i) => {
+    const usageCount = DB.trades.filter(t => t.strategy === s).length;
+    return `<div class="strategy-item" id="strat-row-${i}">
+      <span class="strategy-item-name" id="strat-name-${i}">${s}</span>
+      ${usageCount > 0
+        ? `<span class="strategy-badge">${usageCount} trade${usageCount > 1 ? 's' : ''}</span>`
+        : ''}
+      <span class="strategy-item-count"></span>
+      <button class="btn btn-sm" onclick="editStrategyInline(${i})" title="Edit" style="padding:5px 9px;">
+        <i class="fa-solid fa-pen"></i>
+      </button>
+      <button class="btn btn-danger btn-sm" onclick="deleteStrategy(${i})" title="Delete" style="padding:5px 9px;">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+/* Inline edit: replace name span with input */
+function editStrategyInline(i) {
+  const row = document.getElementById('strat-row-' + i);
+  if (!row) return;
+  const nameSpan = document.getElementById('strat-name-' + i);
+  const cur = DB.strategies[i];
+
+  // Build inline edit row
+  row.innerHTML = `
+    <input type="text" class="strategy-edit-input" id="strat-edit-${i}"
+      value="${cur}" maxlength="40"
+      onkeydown="if(event.key==='Enter')saveStrategyEdit(${i}); if(event.key==='Escape')renderStrategies();">
+    <button class="btn btn-primary btn-sm" onclick="saveStrategyEdit(${i})" style="padding:6px 12px;flex-shrink:0;">
+      <i class="fa-solid fa-check"></i> Save
+    </button>
+    <button class="btn btn-sm" onclick="renderStrategies()" style="padding:6px 10px;flex-shrink:0;">
+      <i class="fa-solid fa-xmark"></i>
+    </button>`;
+
+  const inp = document.getElementById('strat-edit-' + i);
+  if (inp) { inp.focus(); inp.select(); }
+}
+
+/* Save inline edit */
+function saveStrategyEdit(i) {
+  const inp = document.getElementById('strat-edit-' + i);
+  if (!inp) return;
+  const newName = inp.value.trim();
+  if (!newName) { inp.focus(); return; }
+
+  const oldName = DB.strategies[i];
+  if (newName === oldName) { renderStrategies(); return; }
+
+  // Prevent duplicates
+  if (DB.strategies.some((s, j) => j !== i && s === newName)) {
+    inp.style.borderColor = 'var(--red)';
+    inp.style.boxShadow = '0 0 0 2px var(--red-dim)';
+    inp.title = 'Strategy name already exists';
+    inp.focus();
+    return;
+  }
+
+  // Rename in all existing trades
+  DB.trades.forEach(t => { if (t.strategy === oldName) t.strategy = newName; });
+  DB.strategies[i] = newName;
+  saveDB();
+  populateStrategySelects();
+  renderStrategies();
+}
+
+/* Add new strategy */
+function addStrategy() {
+  const inp = document.getElementById('new-strategy-input');
+  if (!inp) return;
+  const name = inp.value.trim();
+  if (!name) { inp.focus(); return; }
+
+  if (DB.strategies.includes(name)) {
+    inp.style.borderColor = 'var(--red)';
+    setTimeout(() => inp.style.borderColor = '', 1500);
+    return;
+  }
+
+  DB.strategies.push(name);
+  saveDB();
+  populateStrategySelects();
+  inp.value = '';
+  renderStrategies();
+  inp.focus();
+}
+
+/* Delete strategy */
+function deleteStrategy(i) {
+  const name = DB.strategies[i];
+  const usageCount = DB.trades.filter(t => t.strategy === name).length;
+
+  const msg = usageCount > 0
+    ? `Delete "${name}"? It's used in ${usageCount} trade${usageCount > 1 ? 's' : ''} — those trades will show "Other".`
+    : `Delete "${name}"?`;
+
+  if (!confirm(msg)) return;
+
+  // Reassign trades that used this strategy
+  DB.trades.forEach(t => { if (t.strategy === name) t.strategy = 'Other'; });
+  DB.strategies.splice(i, 1);
+
+  // Make sure 'Other' still exists
+  if (!DB.strategies.includes('Other')) DB.strategies.push('Other');
+
+  saveDB();
+  populateStrategySelects();
+  renderStrategies();
 }
 
 /* ════════════════════════════════════════
