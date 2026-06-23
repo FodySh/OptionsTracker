@@ -24,13 +24,12 @@
      → "Your apps" → Web app → SDK setup and configuration
   ════════════════════════════════════════════════════════════ */
   const firebaseConfig = {
-  apiKey: "AIzaSyBUzCISS1jFj4QB62ThyKKsS_aBtxOByBs",
-  authDomain: "usoptions-2030f.firebaseapp.com",
-  projectId: "usoptions-2030f",
-  storageBucket: "usoptions-2030f.firebasestorage.app",
-  messagingSenderId: "780662780879",
-  appId: "1:780662780879:web:148af52ccacf098cc658ba",
-  measurementId: "G-PXE60XMJ8E"
+    apiKey:            "PASTE_API_KEY_HERE",
+    authDomain:         "PASTE_PROJECT_ID.firebaseapp.com",
+    projectId:          "PASTE_PROJECT_ID",
+    storageBucket:      "PASTE_PROJECT_ID.appspot.com",
+    messagingSenderId:  "PASTE_SENDER_ID",
+    appId:              "PASTE_APP_ID"
   };
 
   const fbApp  = initializeApp(firebaseConfig);
@@ -81,88 +80,160 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ─── Login Screen ─── */
+/* ─── Auth Bar (top bar before sign-in) ─── */
 #login-screen {
   position: fixed;
-  inset: 0;
-  background: var(--bg-base);
-  background-image:
-    radial-gradient(circle at 20% 20%, rgba(0,212,255,0.06) 0%, transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(167,139,250,0.05) 0%, transparent 40%);
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 1440px;
+  z-index: 2000;
+  pointer-events: none; /* let click-through to demo below */
+}
+
+.auth-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  padding: 20px;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 28px;
+  height: 60px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-mid);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.45);
+  pointer-events: auto;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
-.login-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-mid);
-  border-radius: 18px;
-  padding: 48px 40px;
-  max-width: 380px;
-  width: 100%;
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+
+.auth-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
-.login-logo-badge {
+.auth-bar-logo-badge {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 3px;
   color: var(--cyan);
   text-transform: uppercase;
-  margin-bottom: 8px;
 }
-.login-logo-name {
+.auth-bar-logo-name {
   font-family: var(--display);
-  font-size: 32px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-1);
-  letter-spacing: -0.5px;
-  margin-bottom: 12px;
+  letter-spacing: -0.4px;
 }
-.login-logo-name span { color: var(--cyan); }
-.login-sub {
-  font-size: 13px;
-  color: var(--text-2);
-  margin-bottom: 28px;
-  line-height: 1.6;
+.auth-bar-logo-name span { color: var(--cyan); }
+.auth-bar-divider {
+  width: 1px; height: 22px;
+  background: var(--border-mid);
 }
-.login-google-btn {
-  width: 100%;
+.auth-bar-tagline {
+  font-size: 12px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.auth-bar-right {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  gap: 14px;
+}
+.auth-bar-note {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.login-google-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   background: #fff;
   color: #1f1f1f;
   border: none;
-  padding: 13px 20px;
-  border-radius: 10px;
+  padding: 9px 18px;
+  border-radius: 8px;
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
 }
-.login-google-btn:hover { background: #f0f0f0; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,255,255,0.15); }
-.login-google-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-.login-google-btn i { font-size: 16px; color: #4285F4; }
+.login-google-btn:hover { background: #f0f0f0; transform: translateY(-1px); box-shadow: 0 3px 12px rgba(0,0,0,0.3); }
+.login-google-btn:active { transform: scale(0.97); }
+.login-google-btn:disabled { opacity: 0.55; cursor: wait; transform: none; }
+.login-google-btn i { font-size: 15px; color: #4285F4; }
 .login-status {
-  margin-top: 14px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-3);
-  min-height: 16px;
+  min-width: 120px;
+  text-align: right;
 }
 .login-status.error { color: var(--red); }
-.login-note {
-  margin-top: 24px;
-  font-size: 11px;
-  color: var(--text-3);
-  line-height: 1.6;
-  border-top: 1px solid var(--border);
-  padding-top: 18px;
+
+/* Frosted overlay over the app while signed out */
+#auth-overlay {
+  position: fixed;
+  inset: 0;
+  top: 60px; /* below the auth bar */
+  z-index: 1999;
+  background: rgba(5,10,20,0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.auth-overlay-msg {
+  text-align: center;
+  padding: 32px 40px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  max-width: 340px;
+}
+.auth-overlay-icon {
+  font-size: 32px;
+  margin-bottom: 14px;
+  opacity: 0.7;
+}
+.auth-overlay-title {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-1);
+  margin-bottom: 8px;
+}
+.auth-overlay-sub {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.7;
+}
+
+/* Light mode auth bar */
+body.light .auth-bar {
+  background: rgba(255,255,255,0.92);
+  border-color: rgba(0,0,0,0.09);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+body.light #auth-overlay {
+  background: rgba(240,244,250,0.6);
+}
+
+/* Mobile: simplify auth bar */
+@media (max-width: 600px) {
+  .auth-bar { padding: 0 14px; gap: 10px; }
+  .auth-bar-divider, .auth-bar-tagline, .auth-bar-note { display: none; }
+  .auth-bar-logo-name { font-size: 16px; }
+  .login-google-btn { padding: 8px 13px; font-size: 12px; }
+  .login-google-btn span { display: none; }
+  .login-status { display: none; }
 }
 
 /* ─── Sidebar user account (sign out) ─── */
@@ -227,6 +298,52 @@ body {
   min-height: 100vh;
   display: flex;
   overflow-x: hidden;
+  justify-content: center;
+}
+
+/* ─── App container: constrained width like a real app ─── */
+#app-wrapper {
+  width: 100%;
+  max-width: 1440px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  box-shadow: 0 0 80px rgba(0,0,0,0.4);
+}
+
+/* On screens wider than 1440px — show background behind the app */
+@media (min-width: 1441px) {
+  body {
+    background:
+      repeating-linear-gradient(
+        45deg,
+        rgba(0,212,255,0.015) 0px,
+        rgba(0,212,255,0.015) 1px,
+        transparent 1px,
+        transparent 28px
+      ),
+      var(--bg-base);
+  }
+  body.light {
+    background:
+      repeating-linear-gradient(
+        45deg,
+        rgba(0,113,227,0.04) 0px,
+        rgba(0,113,227,0.04) 1px,
+        transparent 1px,
+        transparent 28px
+      ),
+      #dde3ed;
+  }
+}
+
+/* iPhone 15 Pro: 393px logical width */
+@media (max-width: 430px) {
+  #app-wrapper {
+    max-width: 100%;
+    box-shadow: none;
+  }
 }
 
 /* ─── Scrollbar ─── */
@@ -1183,23 +1300,39 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
 </head>
 <body>
 
-<!-- ─── LOGIN SCREEN ─── -->
+<!-- ─── AUTH BAR (shown before sign-in) ─── -->
 <div id="login-screen">
-  <div class="login-card">
-    <div class="login-logo-badge">// OPTIONS DESK</div>
-    <div class="login-logo-name">Options<span>Pro</span></div>
-    <div class="login-sub">Sign in to access your personal trading data</div>
-    <button class="login-google-btn" id="login-btn" onclick="handleSignIn()">
-      <i class="fa-brands fa-google"></i>
-      <span>Sign in with Google</span>
-    </button>
-    <div class="login-status" id="login-status"></div>
-    <div class="login-note">Your trades, brokers, and subscriptions are private to your account only. Nobody else can see your data.</div>
+  <div class="auth-bar">
+    <div class="auth-bar-left">
+      <div>
+        <div class="auth-bar-logo-badge">// OPTIONS DESK</div>
+        <div class="auth-bar-logo-name">Options<span>Pro</span></div>
+      </div>
+      <div class="auth-bar-divider"></div>
+      <div class="auth-bar-tagline">US Options Trading Tracker</div>
+    </div>
+    <div class="auth-bar-right">
+      <div class="auth-bar-note">🔒 Data is 100% private to your account</div>
+      <div class="login-status" id="login-status"></div>
+      <button class="login-google-btn" id="login-btn" onclick="handleSignIn()">
+        <i class="fa-brands fa-google"></i>
+        <span>Sign in with Google</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── FROSTED OVERLAY (blocks interaction while signed out) ─── -->
+<div id="auth-overlay">
+  <div class="auth-overlay-msg">
+    <div class="auth-overlay-icon">🔐</div>
+    <div class="auth-overlay-title">Sign in to get started</div>
+    <div class="auth-overlay-sub">Your trades, brokers, and subscriptions are encrypted and private — only you can see your data.</div>
   </div>
 </div>
 
 <!-- ─── APP WRAPPER (hidden until signed in) ─── -->
-<div id="app-wrapper" style="display:none;">
+<div id="app-wrapper" style="display:flex;width:100%;min-height:100vh;padding-top:60px;flex-direction:row;">
 
 <!-- ─── SIDEBAR ─── -->
 <nav id="sidebar">
@@ -1951,8 +2084,15 @@ function showLoginStatus(msg, isError) {
 }
 
 function showApp(user) {
+  // Hide auth bar and frosted overlay
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app-wrapper').style.display = 'flex';
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) overlay.style.display = 'none';
+
+  // Remove top padding that was added for auth bar
+  const aw = document.getElementById('app-wrapper');
+  aw.style.display = 'flex';
+  aw.style.paddingTop = '0';
 
   // Populate sidebar user info
   const initials = (user.displayName || user.email || '?').trim().charAt(0).toUpperCase();
@@ -1967,8 +2107,16 @@ function showApp(user) {
 }
 
 function showLogin() {
-  document.getElementById('app-wrapper').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
+  // Show auth bar
+  document.getElementById('login-screen').style.display = 'block';
+  // Show frosted overlay
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) overlay.style.display = 'flex';
+  // Show the app behind (with top padding for the bar)
+  const aw = document.getElementById('app-wrapper');
+  aw.style.display = 'flex';
+  aw.style.paddingTop = '60px';
+
   const btn = document.getElementById('login-btn');
   if (btn) btn.disabled = false;
   showLoginStatus('', false);
