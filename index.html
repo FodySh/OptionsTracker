@@ -315,6 +315,173 @@ body {
 
 
 
+/* ─── Capital card ─── */
+.capital-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.capital-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.capital-input-wrap label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.capital-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text-1);
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+  width: 160px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.capital-input:focus {
+  border-color: var(--border-hi);
+  box-shadow: 0 0 0 3px var(--cyan-glow);
+}
+.capital-divider {
+  width: 1px; height: 40px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.capital-stats {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.capital-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.capital-stat-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+.capital-stat-value {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+.capital-stat-sub {
+  font-size: 10px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+/* ROI gauge bar */
+.roi-bar-wrap {
+  flex: 1;
+  min-width: 160px;
+}
+.roi-bar-track {
+  height: 6px;
+  background: var(--bg-hover);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.roi-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .6s cubic-bezier(.3,.9,.3,1), background .3s;
+  min-width: 2px;
+}
+@media (max-width: 600px) {
+  .capital-card { flex-direction: column; align-items: flex-start; }
+  .capital-divider { width: 100%; height: 1px; }
+  .capital-stats { gap: 18px; }
+}
+
+/* ─── Bulk select & delete ─── */
+.bulk-bar {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--red-dim);
+  border: 1px solid rgba(255,59,92,0.25);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  animation: fadeIn .15s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+.bulk-bar.show { display: flex; }
+.bulk-bar-count {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--red);
+  flex: 1;
+}
+.bulk-delete-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+.bulk-delete-btn:hover { background: #ff1a3a; transform: translateY(-1px); }
+.bulk-delete-btn:active { transform: scale(.97); }
+.bulk-cancel-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 12px;
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--border-mid);
+  border-radius: 7px;
+  font-family: var(--sans);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.bulk-cancel-btn:hover { color: var(--text-1); border-color: var(--border-hi); }
+
+/* checkbox column */
+.col-check { width: 36px; text-align: center !important; }
+.row-checkbox {
+  width: 15px; height: 15px;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+.select-all-chk {
+  width: 15px; height: 15px;
+  accent-color: var(--cyan);
+  cursor: pointer;
+}
+/* highlight selected rows */
+tbody tr.selected-row { background: rgba(255,59,92,0.06) !important; }
+tbody tr.selected-row:hover { background: rgba(255,59,92,0.1) !important; }
+
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
@@ -1426,6 +1593,42 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
       </div>
     </div>
 
+    <!-- ─── Capital / ROI Card ─── -->
+    <div class="capital-card" id="capital-card">
+      <div class="capital-input-wrap">
+        <label>رأس المال ($)</label>
+        <input
+          type="number"
+          id="capital-input"
+          class="capital-input"
+          placeholder="e.g. 10000"
+          min="0"
+          step="100"
+          oninput="saveCapital(this.value); updateTopbarStats();"
+        >
+      </div>
+      <div class="capital-divider"></div>
+      <div class="capital-stats">
+        <div class="capital-stat">
+          <div class="capital-stat-label">ROI — العائد</div>
+          <div class="capital-stat-value" id="kpi-roi">—</div>
+          <div class="capital-stat-sub" id="kpi-roi-sub">أدخل رأس المال لحساب النسبة</div>
+        </div>
+        <div class="capital-stat">
+          <div class="capital-stat-label">صافي الربح</div>
+          <div class="capital-stat-value" id="kpi-net-pnl">$0.00</div>
+          <div class="capital-stat-sub">بعد خصم الرسوم</div>
+        </div>
+        <div class="capital-stat roi-bar-wrap">
+          <div class="capital-stat-label">مستوى العائد</div>
+          <div class="roi-bar-track">
+            <div class="roi-bar-fill" id="roi-bar-fill" style="width:0%;background:var(--green);"></div>
+          </div>
+          <div class="capital-stat-sub" id="roi-bar-label" style="margin-top:6px;">—</div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-header">
         <div class="card-title"><i class="fa-solid fa-plus"></i> Add New Position</div>
@@ -1490,7 +1693,7 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
               <option value="Covered Call">Covered Call</option>
               <option value="Cash Secured Put">Cash Secured Put</option>
               <option value="Bull Call Spread">Bull Call Spread</option>
-              <option value="Bear Put Spread">Bear Put Spread</option>
+              <option value="Options Decision Dashboard">Options Decision Dashboard</option>
               <option value="VWAP 5min">VWAP 5min</option>
               <option value="Telegram group">Telegram group</option>
               <option value="Other">Other</option>
@@ -1540,10 +1743,22 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
       </div>
     </div>
 
+    <!-- Bulk action bar (appears when rows are selected) -->
+    <div class="bulk-bar" id="bulk-bar">
+      <span class="bulk-bar-count" id="bulk-count-label">0 selected</span>
+      <button class="bulk-cancel-btn" onclick="clearBulkSelection()">
+        <i class="fa-solid fa-xmark"></i> Cancel
+      </button>
+      <button class="bulk-delete-btn" onclick="bulkDeleteSelected()">
+        <i class="fa-solid fa-trash"></i> Delete Selected
+      </button>
+    </div>
+
     <div class="table-wrap">
       <table id="trades-table">
         <thead>
           <tr>
+            <th class="col-check"><input type="checkbox" class="select-all-chk" id="select-all-chk" onclick="toggleSelectAll(this)" title="Select all"></th>
             <th>#</th>
             <th>Date</th>
             <th>Ticker</th>
@@ -1563,7 +1778,7 @@ body.arabic .sub-item-left { flex-direction: row-reverse; }
           </tr>
         </thead>
         <tbody id="trades-body">
-          <tr><td colspan="16" style="text-align:center;padding:40px;color:var(--text-3);font-family:var(--mono);font-size:12px;">NO POSITIONS — Add your first trade above ↑</td></tr>
+          <tr><td colspan="17" style="text-align:center;padding:40px;color:var(--text-3);font-family:var(--mono);font-size:12px;">NO POSITIONS — Add your first trade above ↑</td></tr>
         </tbody>
       </table>
     </div>
@@ -2142,6 +2357,7 @@ const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Satur
 const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 function runAppInit() {
+  loadCapital();   // restore capital from localStorage before first render
   // Date displays
   const dateStr = days[NOW.getDay()] + ', ' + months[NOW.getMonth()] + ' ' + NOW.getDate() + ', ' + NOW.getFullYear();
   document.getElementById('sb-date').textContent = dateStr;
@@ -2284,6 +2500,8 @@ function calcPnLPct(trade) {
 }
 
 function renderTrades() {
+  // Reset bulk selection on every render
+  clearBulkSelection();
   const statusF = document.getElementById('filter-status').value;
   const typeF   = document.getElementById('filter-type').value;
   const tickerF = (document.getElementById('filter-ticker').value || '').toUpperCase();
@@ -2300,7 +2518,7 @@ function renderTrades() {
   document.getElementById('trade-count').textContent = trades.length + ' positions';
 
   if (!trades.length) {
-    document.getElementById('trades-body').innerHTML = `<tr><td colspan="16" style="text-align:center;padding:40px;color:var(--text-3);font-family:var(--mono);font-size:12px;">NO POSITIONS MATCH FILTER</td></tr>`;
+    document.getElementById('trades-body').innerHTML = `<tr><td colspan="17" style="text-align:center;padding:40px;color:var(--text-3);font-family:var(--mono);font-size:12px;">NO POSITIONS MATCH FILTER</td></tr>`;
     return;
   }
 
@@ -2318,6 +2536,7 @@ function renderTrades() {
     const cname = t.company_name || '';
 
     return `<tr data-trade-id="${t.id}">
+      <td class="col-check"><input type="checkbox" class="row-checkbox" data-id="${t.id}" onclick="onRowCheck(this)"></td>
       <td style="font-family:var(--mono);font-size:11px;color:var(--text-3);">#${t.id}</td>
       <td style="font-family:var(--mono);font-size:11px;">${t.trade_date || '—'}</td>
       <td>
@@ -2424,6 +2643,77 @@ function updateTopbarStats() {
   document.getElementById('kpi-open').textContent = openCount;
   document.getElementById('kpi-winrate').textContent = winRate + '%';
   document.getElementById('kpi-fees').textContent = '$' + totalFees.toFixed(2);
+
+  // ── ROI vs Capital ──
+  updateROI(totalPnL);
+}
+
+function updateROI(totalPnL) {
+  const capital = parseFloat(document.getElementById('capital-input')?.value) || 0;
+
+  // Net P&L display
+  const netEl = document.getElementById('kpi-net-pnl');
+  if (netEl) {
+    netEl.textContent = (totalPnL >= 0 ? '+' : '') + '$' + Math.abs(totalPnL).toFixed(2);
+    netEl.className = 'capital-stat-value ' + (totalPnL >= 0 ? 'pos' : 'neg');
+  }
+
+  const roiEl  = document.getElementById('kpi-roi');
+  const subEl  = document.getElementById('kpi-roi-sub');
+  const barEl  = document.getElementById('roi-bar-fill');
+  const barLbl = document.getElementById('roi-bar-label');
+
+  if (!capital || capital <= 0) {
+    if (roiEl)  { roiEl.textContent = '—'; roiEl.className = 'capital-stat-value'; }
+    if (subEl)    subEl.textContent = 'أدخل رأس المال لحساب النسبة';
+    if (barEl)  { barEl.style.width = '0%'; }
+    if (barLbl)   barLbl.textContent = '—';
+    return;
+  }
+
+  const roi = (totalPnL / capital) * 100;
+  const roiStr = (roi >= 0 ? '+' : '') + roi.toFixed(2) + '%';
+
+  if (roiEl) {
+    roiEl.textContent = roiStr;
+    roiEl.className = 'capital-stat-value ' + (roi >= 0 ? 'pos' : 'neg');
+  }
+  if (subEl) {
+    subEl.textContent = 'من رأس مال $' + capital.toLocaleString();
+  }
+
+  // Bar: cap at ±100% visually, color by performance
+  const absPct = Math.min(Math.abs(roi), 100);
+  const color = roi >= 20 ? 'var(--cyan)' :
+                roi >= 5  ? 'var(--green)' :
+                roi >= 0  ? '#6ee7b7' :
+                roi >= -10? 'var(--amber)' : 'var(--red)';
+  if (barEl) {
+    barEl.style.width  = absPct + '%';
+    barEl.style.background = color;
+  }
+
+  // Bar label: tier
+  const tier = roi >= 20  ? '🚀 ممتاز'  :
+               roi >= 10  ? '📈 جيد جداً' :
+               roi >= 5   ? '✅ جيد'      :
+               roi >= 0   ? '🔄 إيجابي'  :
+               roi >= -10 ? '⚠️ خسارة محدودة' : '🔴 خسارة';
+  if (barLbl) barLbl.textContent = tier + '  (' + roiStr + ' من رأس المال)';
+}
+
+function saveCapital(val) {
+  try { localStorage.setItem('optionspro_capital', val); } catch(e) {}
+}
+
+function loadCapital() {
+  try {
+    const v = localStorage.getItem('optionspro_capital');
+    if (v) {
+      const inp = document.getElementById('capital-input');
+      if (inp) inp.value = v;
+    }
+  } catch(e) {}
 }
 
 /* ════════════════════════════════════════ DASHBOARD ══════════════════════════════ */
@@ -3057,7 +3347,7 @@ function applyLang() {
   kpiSubs.forEach((el,i)   => { if(kpiSubKeys[i])   el.textContent = t(kpiSubKeys[i]); });
 
   // Table headers
-  const thKeys = ['col_id','col_date','col_ticker','col_type','col_strike','col_expiry','col_qty','col_entry','col_current','col_pnl','col_pnlpct','col_fees','col_status','col_broker','col_strategy','col_actions'];
+  const thKeys = [null,'col_id','col_date','col_ticker','col_type','col_strike','col_expiry','col_qty','col_entry','col_current','col_pnl','col_pnlpct','col_fees','col_status','col_broker','col_strategy','col_actions'];
   document.querySelectorAll('#trades-table thead th').forEach((th,i) => { if(thKeys[i]) th.textContent = t(thKeys[i]); });
 
   // Form labels — transactions
@@ -3613,6 +3903,73 @@ function exportFeesToExcel() {
     const monthLabel = monthF ? '_' + monthF : '';
     XLSX.writeFile(wb, 'OptionsPro_Fees' + monthLabel + '.xlsx');
   });
+}
+
+/* ════════════════════════════════════════
+   BULK SELECT & DELETE
+════════════════════════════════════════ */
+
+function getSelectedIds() {
+  return [...document.querySelectorAll('.row-checkbox:checked')]
+    .map(cb => parseInt(cb.getAttribute('data-id')));
+}
+
+function updateBulkBar() {
+  const ids = getSelectedIds();
+  const bar = document.getElementById('bulk-bar');
+  const lbl = document.getElementById('bulk-count-label');
+  const allChk = document.getElementById('select-all-chk');
+  const total = document.querySelectorAll('.row-checkbox').length;
+
+  if (ids.length > 0) {
+    bar.classList.add('show');
+    lbl.textContent = ids.length + ' selected';
+  } else {
+    bar.classList.remove('show');
+  }
+
+  // Update select-all state
+  if (allChk) {
+    allChk.checked = total > 0 && ids.length === total;
+    allChk.indeterminate = ids.length > 0 && ids.length < total;
+  }
+
+  // Highlight selected rows
+  document.querySelectorAll('#trades-body tr').forEach(tr => {
+    const cb = tr.querySelector('.row-checkbox');
+    if (cb) tr.classList.toggle('selected-row', cb.checked);
+  });
+}
+
+function onRowCheck(cb) {
+  updateBulkBar();
+}
+
+function toggleSelectAll(masterChk) {
+  document.querySelectorAll('.row-checkbox').forEach(cb => {
+    cb.checked = masterChk.checked;
+  });
+  updateBulkBar();
+}
+
+function clearBulkSelection() {
+  document.querySelectorAll('.row-checkbox:checked').forEach(cb => { cb.checked = false; });
+  document.querySelectorAll('#trades-body tr.selected-row').forEach(tr => tr.classList.remove('selected-row'));
+  const allChk = document.getElementById('select-all-chk');
+  if (allChk) { allChk.checked = false; allChk.indeterminate = false; }
+  const bar = document.getElementById('bulk-bar');
+  if (bar) bar.classList.remove('show');
+}
+
+function bulkDeleteSelected() {
+  const ids = getSelectedIds();
+  if (!ids.length) return;
+  const n = ids.length;
+  if (!confirm(`Delete ${n} selected position${n > 1 ? 's' : ''}? This cannot be undone.`)) return;
+  DB.trades = DB.trades.filter(t => !ids.includes(t.id));
+  saveDB();
+  renderTrades();   // also calls clearBulkSelection via reset at top
+  updateTopbarStats();
 }
 
 // Start app
