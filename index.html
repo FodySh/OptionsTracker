@@ -868,12 +868,13 @@ tbody td:first-child { color: var(--text-1); font-weight: 500; }
 .modal-overlay {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.7);
-  display: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
 }
-.modal-overlay.open { display: flex; }
 .modal {
   background: var(--bg-card);
   border: 1px solid var(--border-mid);
@@ -1478,6 +1479,99 @@ body.arabic .broker-card { flex-direction: row-reverse; }
 body.arabic .broker-info { flex-direction: row-reverse; }
 body.arabic .sub-item { flex-direction: row-reverse; }
 body.arabic .sub-item-left { flex-direction: row-reverse; }
+
+/* ══════════════════════════════════════
+   DESIGN POLISH LAYER
+══════════════════════════════════════ */
+
+/* Page entrance animation */
+.page.active { animation: pageIn .28s cubic-bezier(.25,.9,.3,1); }
+@keyframes pageIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+/* KPI cards: lift + glow on hover, accent line grows */
+.kpi-card { transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-mid);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+.kpi-card::before { transition: height .2s ease; }
+.kpi-card:hover::before { height: 3px; }
+
+/* KPI value: glow pulse when it updates */
+.kpi-value.flash { animation: kpiFlash .8s ease; }
+@keyframes kpiFlash {
+  0% { opacity:.4; }
+  40% { opacity:1; text-shadow: 0 0 18px currentColor; }
+  100% { text-shadow: none; }
+}
+
+/* Cards: gradient border feel on hover */
+.card { transition: border-color .2s ease; }
+.card:hover { border-color: var(--border-mid); }
+
+/* Table rows: left accent bar on hover */
+tbody tr { position: relative; }
+tbody tr:hover { box-shadow: inset 3px 0 0 var(--cyan); }
+body.arabic tbody tr:hover { box-shadow: inset -3px 0 0 var(--cyan); }
+
+/* Sticky table header while scrolling */
+.table-wrap { max-height: 620px; overflow-y: auto; }
+thead th { position: sticky; top: 0; z-index: 5; }
+
+/* Buttons: press feedback */
+.btn:active, .bi-start-btn:active, .login-google-btn:active { transform: scale(.965); }
+.btn-primary { box-shadow: 0 0 14px rgba(0,212,255,.18); }
+.btn-primary:hover { box-shadow: 0 0 22px rgba(0,212,255,.35); }
+
+/* Nav items: icon slide on hover */
+.nav-item i { transition: transform .15s ease; }
+.nav-item:hover i { transform: translateX(2px); }
+body.arabic .nav-item:hover i { transform: translateX(-2px); }
+
+/* Focus rings — keyboard accessibility */
+.btn:focus-visible, input:focus-visible, select:focus-visible, .nav-item:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* Badges: subtle inner glow */
+.badge-call { box-shadow: inset 0 0 8px rgba(0,212,255,.06); }
+.badge-put  { box-shadow: inset 0 0 8px rgba(167,139,250,.06); }
+
+/* Modal: smoother entrance */
+.modal-overlay { transition: opacity .2s ease; opacity: 0; pointer-events: none; display: flex; }
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal { transform: translateY(18px) scale(.98); transition: transform .25s cubic-bezier(.2,.9,.3,1); }
+.modal-overlay.open .modal { transform: none; }
+
+/* Capital card: accent gradient border */
+.capital-card {
+  background:
+    linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+    linear-gradient(120deg, rgba(0,212,255,.35), rgba(0,212,255,.04) 40%, rgba(167,139,250,.2)) border-box;
+  border: 1px solid transparent;
+}
+
+/* Bulk bar: slide-in */
+.bulk-bar.show { animation: slideDown .18s ease; }
+@keyframes slideDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+
+/* Scrollbar refinement */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+/* Ticker tape: pause on hover so numbers are readable */
+.ticker-tape:hover .ticker-inner { animation-play-state: paused; }
+
+/* Reduced motion: respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -2726,6 +2820,13 @@ function updateTopbarStats() {
   document.getElementById('kpi-open').textContent = openCount;
   document.getElementById('kpi-winrate').textContent = winRate + '%';
   document.getElementById('kpi-fees').textContent = '$' + totalFees.toFixed(2);
+
+  // Flash animation on KPI update
+  document.querySelectorAll('#page-transactions .kpi-value').forEach(el => {
+    el.classList.remove('flash');
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add('flash');
+  });
 
   // ── ROI vs Capital ──
   updateROI(totalPnL);
