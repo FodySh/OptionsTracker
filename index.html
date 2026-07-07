@@ -1637,6 +1637,10 @@ body.arabic .nav-item:hover i { transform: translateX(-2px); }
       <i class="fa-solid fa-chart-line"></i>
       <span>Dashboard</span>
     </div>
+    <div class="nav-item" onclick="showPage('insights')">
+      <i class="fa-solid fa-brain"></i>
+      <span>Insights</span>
+    </div>
 
     <div class="nav-section-label">Management</div>
     <div class="nav-item" onclick="showPage('subscriptions')">
@@ -2066,6 +2070,99 @@ body.arabic .nav-item:hover i { transform: translateX(-2px); }
       </div>
       <div id="strategies-list">
         <div class="empty-state"><i class="fa-solid fa-tags"></i><p>No strategies yet.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       PAGE: INSIGHTS (advanced analytics)
+  ══════════════════════════════════════════════ -->
+  <div class="page" id="page-insights">
+    <div class="page-title">Insights</div>
+    <div class="page-sub">Equity curve, risk metrics, and performance patterns</div>
+
+    <!-- Risk KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card cyan">
+        <div class="kpi-label">Profit Factor</div>
+        <div class="kpi-value" id="ins-pf">—</div>
+        <div class="kpi-sub">Gross wins ÷ gross losses</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">Max Drawdown</div>
+        <div class="kpi-value neg" id="ins-dd">—</div>
+        <div class="kpi-sub" id="ins-dd-sub">Peak-to-trough decline</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Best Trade</div>
+        <div class="kpi-value pos" id="ins-best">—</div>
+        <div class="kpi-sub" id="ins-best-sub">—</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Worst Trade</div>
+        <div class="kpi-value neg" id="ins-worst">—</div>
+        <div class="kpi-sub" id="ins-worst-sub">—</div>
+      </div>
+    </div>
+
+    <!-- Equity Curve -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fa-solid fa-chart-area"></i> Equity Curve — Cumulative P&L</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);" id="equity-range">—</div>
+      </div>
+      <div id="equity-curve-wrap" style="width:100%;height:260px;position:relative;">
+        <svg id="equity-svg" width="100%" height="260" preserveAspectRatio="none" style="display:block;"></svg>
+      </div>
+    </div>
+
+    <div class="section-row">
+      <!-- Day of week performance -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-calendar-week"></i> P&L by Day of Week</div>
+        </div>
+        <div id="dow-chart"></div>
+      </div>
+
+      <!-- Monthly goal -->
+      <div class="card" style="flex:0.8;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa-solid fa-bullseye"></i> Monthly Goal</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;">
+          <div class="form-group" style="flex:1;">
+            <label>Target Profit ($ / month)</label>
+            <input type="number" id="goal-input" placeholder="e.g. 1000" min="0" step="50"
+              oninput="saveGoal(this.value); renderInsights();">
+          </div>
+        </div>
+        <div id="goal-progress"></div>
+      </div>
+    </div>
+
+    <!-- Position size calculator -->
+    <div class="card" style="max-width:680px;">
+      <div class="card-header">
+        <div class="card-title"><i class="fa-solid fa-calculator"></i> Position Size Calculator</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);">RISK-BASED SIZING</div>
+      </div>
+      <div class="form-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+        <div class="form-group">
+          <label>Risk per Trade (%)</label>
+          <input type="number" id="calc-risk-pct" value="2" min="0.1" max="100" step="0.5" oninput="calcPositionSize()">
+        </div>
+        <div class="form-group">
+          <label>Option Premium ($)</label>
+          <input type="number" id="calc-premium" placeholder="e.g. 3.50" min="0" step="0.05" oninput="calcPositionSize()">
+        </div>
+        <div class="form-group">
+          <label>Max Loss per Contract (%)</label>
+          <input type="number" id="calc-stop-pct" value="50" min="1" max="100" step="5" oninput="calcPositionSize()">
+        </div>
+      </div>
+      <div id="calc-result" style="font-family:var(--mono);font-size:13px;color:var(--text-2);padding:12px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;">
+        أدخل رأس المال في صفحة Transactions أولاً، ثم عبّئ الحقول أعلاه
       </div>
     </div>
   </div>
@@ -2507,12 +2604,13 @@ function showPage(name) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   event.currentTarget.classList.add('active');
-  const titles = { transactions:'Transactions', brokers:'Broker Management', dashboard:'P&L Dashboard', subscriptions:'Subscriptions & Fees', brief:'Morning Brief', strategies:'Strategy Manager' };
+  const titles = { transactions:'Transactions', brokers:'Broker Management', dashboard:'P&L Dashboard', subscriptions:'Subscriptions & Fees', brief:'Morning Brief', strategies:'Strategy Manager', insights:'Insights' };
   document.getElementById('topbar-title').textContent = titles[name] || name;
   if (name === 'dashboard')   renderDashboard('day');
   if (name === 'subscriptions') renderSubs();
   if (name === 'brokers')     renderBrokers();
   if (name === 'strategies')  renderStrategies();
+  if (name === 'insights')    renderInsights();
   // Close mobile sidebar drawer after navigation
   if (window.innerWidth <= 900) closeSidebar();
 }
@@ -2722,7 +2820,14 @@ function renderTrades() {
       </td>
       <td><span class="badge ${typeCls}">${t.type}</span></td>
       <td style="font-family:var(--mono);">$${t.strike.toFixed(2)}</td>
-      <td style="font-family:var(--mono);font-size:11px;">${t.expiry || '—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${t.expiry || '—'}${(() => {
+        if (t.status !== 'OPEN' || !t.expiry) return '';
+        const dte = Math.round((new Date(t.expiry+'T00:00:00') - new Date(new Date().toDateString())) / 86400000);
+        if (dte < 0)  return ' <span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--red-dim);color:var(--red);font-weight:700;">EXPIRED</span>';
+        if (dte <= 7) return ' <span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--red-dim);color:var(--red);font-weight:700;">'+dte+'d ⚠️</span>';
+        if (dte <= 21) return ' <span style="font-size:9px;padding:1px 5px;border-radius:4px;background:var(--amber-dim);color:var(--amber);font-weight:600;">'+dte+'d</span>';
+        return '';
+      })()}</td>
       <td style="font-family:var(--mono);">${t.contracts}</td>
       <td style="font-family:var(--mono);">$${parseFloat(t.entry_premium).toFixed(2)}</td>
       <td style="font-family:var(--mono);">$${parseFloat(t.current_price).toFixed(2)}</td>
@@ -3426,6 +3531,7 @@ function addTrade() {
 const EN = {
   nav_trading: 'Trading', nav_analytics: 'Analytics', nav_management: 'Management',
   nav_intelligence: 'Intelligence', nav_transactions: 'Transactions',
+  nav_strategies: 'Strategies', nav_insights: 'Insights',
   nav_brokers: 'Brokers', nav_dashboard: 'Dashboard', nav_subscriptions: 'Subscriptions',
   nav_brief: 'Morning Brief',
   page_transactions: 'Options Positions',
@@ -3466,6 +3572,7 @@ const EN = {
 const AR = {
   nav_trading: 'التداول', nav_analytics: 'التحليلات', nav_management: 'الإدارة',
   nav_intelligence: 'الذكاء', nav_transactions: 'المعاملات',
+  nav_strategies: 'الاستراتيجيات', nav_insights: 'التحليلات المتقدمة',
   nav_brokers: 'الوسطاء', nav_dashboard: 'لوحة التحكم', nav_subscriptions: 'الاشتراكات',
   nav_brief: 'التقرير الصباحي',
   page_transactions: 'مراكز الخيارات',
@@ -3521,7 +3628,7 @@ function applyLang() {
 
   // Nav items
   const navItems = document.querySelectorAll('.nav-item span');
-  const navKeys = ['nav_transactions','nav_brokers','nav_dashboard','nav_subscriptions','nav_brief'];
+  const navKeys = ['nav_transactions','nav_brokers','nav_strategies','nav_dashboard','nav_insights','nav_subscriptions','nav_brief'];
   navItems.forEach((el,i) => { if(navKeys[i]) el.textContent = t(navKeys[i]); });
 
   // Lang button label
@@ -4116,6 +4223,244 @@ function exportFeesToExcel() {
     const monthLabel = monthF ? '_' + monthF : '';
     XLSX.writeFile(wb, 'OptionsPro_Fees' + monthLabel + '.xlsx');
   });
+}
+
+/* ════════════════════════════════════════
+   INSIGHTS — equity curve, risk metrics
+════════════════════════════════════════ */
+
+function renderInsights() {
+  loadGoal();
+  renderRiskKpis();
+  renderEquityCurve();
+  renderDowChart();
+  renderGoalProgress();
+  calcPositionSize();
+}
+
+/* Closed trades sorted by date, with cumulative P&L */
+function getEquitySeries() {
+  const closed = DB.trades
+    .filter(t => t.status !== 'OPEN' && t.trade_date)
+    .sort((a, b) => a.trade_date.localeCompare(b.trade_date));
+  let cum = 0;
+  return closed.map(t => {
+    cum += calcPnL(t);
+    return { date: t.trade_date, pnl: calcPnL(t), cum, ticker: t.ticker };
+  });
+}
+
+function renderRiskKpis() {
+  const closed = DB.trades.filter(t => t.status !== 'OPEN');
+  const wins   = closed.filter(t => calcPnL(t) > 0);
+  const losses = closed.filter(t => calcPnL(t) <= 0);
+  const grossWin  = wins.reduce((s, t) => s + calcPnL(t), 0);
+  const grossLoss = Math.abs(losses.reduce((s, t) => s + calcPnL(t), 0));
+
+  // Profit factor
+  const pfEl = document.getElementById('ins-pf');
+  if (grossLoss === 0 && grossWin > 0)       { pfEl.textContent = '∞'; pfEl.className = 'kpi-value pos'; }
+  else if (grossLoss === 0)                   { pfEl.textContent = '—'; pfEl.className = 'kpi-value'; }
+  else {
+    const pf = grossWin / grossLoss;
+    pfEl.textContent = pf.toFixed(2);
+    pfEl.className = 'kpi-value ' + (pf >= 1.5 ? 'pos' : pf >= 1 ? '' : 'neg');
+  }
+
+  // Max drawdown from equity series
+  const series = getEquitySeries();
+  let peak = 0, maxDD = 0;
+  series.forEach(pt => {
+    if (pt.cum > peak) peak = pt.cum;
+    const dd = peak - pt.cum;
+    if (dd > maxDD) maxDD = dd;
+  });
+  document.getElementById('ins-dd').textContent = maxDD > 0 ? '-$' + maxDD.toFixed(2) : '$0.00';
+  const cap = parseFloat(document.getElementById('capital-input')?.value) || 0;
+  document.getElementById('ins-dd-sub').textContent = cap > 0 && maxDD > 0
+    ? (maxDD / cap * 100).toFixed(1) + '% of capital'
+    : 'Peak-to-trough decline';
+
+  // Best / worst trade
+  let best = null, worst = null;
+  closed.forEach(t => {
+    const p = calcPnL(t);
+    if (!best  || p > calcPnL(best))  best = t;
+    if (!worst || p < calcPnL(worst)) worst = t;
+  });
+  if (best) {
+    document.getElementById('ins-best').textContent = '+$' + calcPnL(best).toFixed(2);
+    document.getElementById('ins-best-sub').textContent = best.ticker + ' · ' + (best.trade_date || '');
+  } else {
+    document.getElementById('ins-best').textContent = '—';
+    document.getElementById('ins-best-sub').textContent = '—';
+  }
+  if (worst) {
+    const wp = calcPnL(worst);
+    document.getElementById('ins-worst').textContent = (wp >= 0 ? '+' : '-') + '$' + Math.abs(wp).toFixed(2);
+    document.getElementById('ins-worst-sub').textContent = worst.ticker + ' · ' + (worst.trade_date || '');
+  } else {
+    document.getElementById('ins-worst').textContent = '—';
+    document.getElementById('ins-worst-sub').textContent = '—';
+  }
+}
+
+/* SVG equity curve with gradient fill */
+function renderEquityCurve() {
+  const svg = document.getElementById('equity-svg');
+  const series = getEquitySeries();
+  const rangeEl = document.getElementById('equity-range');
+
+  if (!series.length) {
+    svg.innerHTML = '<text x="50%" y="50%" fill="var(--text-3)" font-size="12" font-family="monospace" text-anchor="middle">NO CLOSED TRADES YET</text>';
+    if (rangeEl) rangeEl.textContent = '—';
+    return;
+  }
+
+  if (rangeEl) rangeEl.textContent = series[0].date + ' → ' + series[series.length-1].date + ' · ' + series.length + ' trades';
+
+  const W = svg.clientWidth || 800, H = 260, PAD = 24;
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+  const vals = series.map(p => p.cum);
+  const minV = Math.min(0, ...vals);
+  const maxV = Math.max(0, ...vals);
+  const span = (maxV - minV) || 1;
+
+  const x = i => PAD + i * (W - PAD*2) / Math.max(series.length - 1, 1);
+  const y = v => PAD + (maxV - v) * (H - PAD*2) / span;
+
+  // Line path
+  const linePath = series.map((p, i) => (i === 0 ? 'M' : 'L') + x(i).toFixed(1) + ',' + y(p.cum).toFixed(1)).join(' ');
+  // Area path (down to zero line)
+  const zeroY = y(0);
+  const areaPath = linePath + ' L' + x(series.length-1).toFixed(1) + ',' + zeroY.toFixed(1) + ' L' + x(0).toFixed(1) + ',' + zeroY.toFixed(1) + ' Z';
+
+  const lastVal = vals[vals.length - 1];
+  const mainColor = lastVal >= 0 ? 'var(--green)' : 'var(--red)';
+  const gradTop   = lastVal >= 0 ? 'rgba(0,255,136,0.25)' : 'rgba(255,59,92,0.25)';
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="eqGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${gradTop}"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </linearGradient>
+    </defs>
+    <line x1="${PAD}" y1="${zeroY}" x2="${W-PAD}" y2="${zeroY}" stroke="var(--border-mid)" stroke-dasharray="4 4" stroke-width="1"/>
+    <path d="${areaPath}" fill="url(#eqGrad)"/>
+    <path d="${linePath}" fill="none" stroke="${mainColor}" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="${x(series.length-1)}" cy="${y(lastVal)}" r="4" fill="${mainColor}"/>
+    <text x="${W-PAD}" y="${y(lastVal) - 10}" fill="${mainColor}" font-size="12" font-family="monospace" text-anchor="end" font-weight="700">
+      ${lastVal >= 0 ? '+' : '-'}$${Math.abs(lastVal).toFixed(2)}
+    </text>`;
+}
+
+/* P&L grouped by weekday */
+function renderDowChart() {
+  const el = document.getElementById('dow-chart');
+  const dows = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const agg = Array(7).fill(null).map(() => ({ pnl: 0, n: 0 }));
+
+  DB.trades.filter(t => t.status !== 'OPEN' && t.trade_date).forEach(t => {
+    const d = new Date(t.trade_date + 'T00:00:00');
+    if (isNaN(d)) return;
+    agg[d.getDay()].pnl += calcPnL(t);
+    agg[d.getDay()].n   += 1;
+  });
+
+  const maxAbs = Math.max(...agg.map(a => Math.abs(a.pnl)), 1);
+
+  el.innerHTML = agg.map((a, i) => {
+    const w = Math.abs(a.pnl) / maxAbs * 100;
+    const color = a.n === 0 ? 'var(--border)' : a.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-3);width:32px;">${dows[i]}</span>
+      <div style="flex:1;height:14px;background:var(--bg-surface);border-radius:4px;overflow:hidden;border:1px solid var(--border);">
+        <div style="height:100%;width:${w}%;background:${color};border-radius:4px;transition:width .5s ease;"></div>
+      </div>
+      <span style="font-family:var(--mono);font-size:11px;width:90px;text-align:right;" class="${a.pnl >= 0 ? 'pos' : 'neg'}">
+        ${a.n ? (a.pnl>=0?'+':'-')+'$'+Math.abs(a.pnl).toFixed(0)+' ('+a.n+')' : '—'}
+      </span>
+    </div>`;
+  }).join('');
+}
+
+/* Monthly goal */
+function saveGoal(v) { try { localStorage.setItem('optionspro_goal', v); } catch(e) {} }
+function loadGoal() {
+  try {
+    const v = localStorage.getItem('optionspro_goal');
+    const inp = document.getElementById('goal-input');
+    if (v && inp && !inp.value) inp.value = v;
+  } catch(e) {}
+}
+
+function renderGoalProgress() {
+  const el = document.getElementById('goal-progress');
+  const goal = parseFloat(document.getElementById('goal-input')?.value) || 0;
+
+  if (!goal) {
+    el.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--text-3);">حدد هدفك الشهري أعلاه</div>';
+    return;
+  }
+
+  // This month's P&L (closed trades only)
+  const now = new Date();
+  const thisMonth = DB.trades.filter(t => {
+    if (t.status === 'OPEN' || !t.trade_date) return false;
+    const d = new Date(t.trade_date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const mPnL = thisMonth.reduce((s, t) => s + calcPnL(t), 0);
+  const pct = Math.min(Math.max(mPnL / goal * 100, 0), 100);
+  const done = mPnL >= goal;
+  const color = done ? 'var(--green)' : mPnL >= 0 ? 'var(--cyan)' : 'var(--red)';
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+      <span style="font-family:var(--mono);font-size:20px;font-weight:700;" class="${mPnL>=0?'pos':'neg'}">${mPnL>=0?'+':'-'}$${Math.abs(mPnL).toFixed(2)}</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text-3);">of $${goal.toLocaleString()}</span>
+    </div>
+    <div style="height:10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:5px;overflow:hidden;">
+      <div style="height:100%;width:${pct}%;background:${color};border-radius:5px;transition:width .6s ease;"></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:7px;">
+      ${done ? '🎉 هدف الشهر تحقق!' : pct.toFixed(0) + '% من الهدف · باقي $' + (goal - mPnL).toFixed(2)}
+    </div>`;
+}
+
+/* Position size calculator */
+function calcPositionSize() {
+  const el = document.getElementById('calc-result');
+  if (!el) return;
+  const capital = parseFloat(document.getElementById('capital-input')?.value) || 0;
+  const riskPct = parseFloat(document.getElementById('calc-risk-pct')?.value) || 0;
+  const premium = parseFloat(document.getElementById('calc-premium')?.value) || 0;
+  const stopPct = parseFloat(document.getElementById('calc-stop-pct')?.value) || 0;
+
+  if (!capital) { el.innerHTML = '⚠️ أدخل رأس المال في صفحة Transactions أولاً'; return; }
+  if (!premium || !riskPct || !stopPct) { el.innerHTML = 'عبّئ الحقول أعلاه لحساب حجم المركز المناسب'; return; }
+
+  const riskAmount   = capital * riskPct / 100;          // $ you're willing to lose
+  const lossPerCtr   = premium * 100 * stopPct / 100;    // $ lost per contract at stop
+  const contracts    = Math.floor(riskAmount / lossPerCtr);
+  const totalCost    = contracts * premium * 100;
+
+  if (contracts < 1) {
+    el.innerHTML = `⚠️ المخاطرة المسموحة ($${riskAmount.toFixed(2)}) أقل من خسارة عقد واحد ($${lossPerCtr.toFixed(2)}) — قلل الـ premium أو ارفع نسبة المخاطرة`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+      <div><div style="font-size:9px;color:var(--text-3);letter-spacing:1px;">CONTRACTS</div>
+        <div style="font-size:20px;font-weight:700;color:var(--cyan);">${contracts}</div></div>
+      <div><div style="font-size:9px;color:var(--text-3);letter-spacing:1px;">TOTAL COST</div>
+        <div style="font-size:16px;font-weight:600;">$${totalCost.toFixed(2)}</div></div>
+      <div><div style="font-size:9px;color:var(--text-3);letter-spacing:1px;">MAX RISK</div>
+        <div style="font-size:16px;font-weight:600;color:var(--red);">$${riskAmount.toFixed(2)}</div></div>
+    </div>`;
 }
 
 /* ════════════════════════════════════════
